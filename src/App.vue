@@ -4,15 +4,14 @@
     <div class="row">
       <div class="col-md-8">
         <div class="mb-3">
-          <button class="btn btn-success mt-3" @click="createNewList">Create New List</button>
           <div class="mb-3">
             <label for="listSelect">Select a list:</label>
             <select class="form-select" id="listSelect" v-model="selectedList" @change="loadList">
               <option v-for="list in listNames" :key="list" :value="list">{{ list }}</option>
             </select>
           </div>
-          <input type="text" class="form-control" v-model="newTodo" placeholder="Add new todo" @keyup.enter="addTodo">
-          <button class="btn btn-primary mt-3" @click="addTodo">Add Todo</button>
+          <button class="btn btn-success mt-3" @click="createNewList">Create New List</button>
+          <hr>
         </div>
         <ul class="list-group" ref="listGroup">
           <h3 class="mt-5">To-do:</h3>
@@ -38,6 +37,10 @@
             </div>
           </li>
         </ul>
+        <br>
+        <input type="text" class="form-control" v-model="newTodo" placeholder="Add new todo" @keyup.enter="addTodo">
+          <button class="btn btn-primary mt-3" @click="addTodo">Add Todo</button>
+
         <ul class="list-group" ref="completedListGroup">
           <h3 class="mt-5" v-if="completedTodos.length > 0">Done:</h3>
           <li v-for="(todo, index) in completedTodos" :key="index" class="list-group-item"
