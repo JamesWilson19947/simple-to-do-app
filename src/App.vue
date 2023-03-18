@@ -7,7 +7,7 @@
           <div class="mb-3">
             <label for="listSelect">Select a list:</label>
             <select class="form-select" id="listSelect" v-model="selectedList" @change="loadList">
-              <option v-for="list in listNames" :key="list" :value="list">{{ list }}</option>
+              <option v-for="list in listNames" :key="list" :value="list" :selected="list === 'My Shopping List'">{{ list }}</option>
             </select>
           </div>
           <button class="btn btn-success mt-3" @click="createNewList">Create New List</button>
