@@ -4,6 +4,13 @@
     <div class="row">
       <div class="col-md-8">
         <div class="mb-3">
+          <button class="btn btn-success mt-3" @click="createNewList">Create New List</button>
+          <div class="mb-3">
+            <label for="listSelect">Select a list:</label>
+            <select class="form-select" id="listSelect" v-model="selectedList" @change="loadList">
+              <option v-for="list in listNames" :key="list" :value="list">{{ list }}</option>
+            </select>
+          </div>
           <input type="text" class="form-control" v-model="newTodo" placeholder="Add new todo" @keyup.enter="addTodo">
           <button class="btn btn-primary mt-3" @click="addTodo">Add Todo</button>
         </div>
@@ -61,6 +68,7 @@
       <div class="col-md-4">
         <h2 class="mb-4">About this tool</h2>
         <p>This to-do is stored in local browser storage, you clear your cache and its gone!</p>
+        <p> Select or create a new list</p>
         <p>To add a new todo, enter the title in the input field and click the "Add Todo" button.</p>
         <p>To mark a todo as completed, click the checkbox next to the todo's title.</p>
         <p>To remove a todo, click the "Remove" button next to the todo's title.</p>
@@ -70,17 +78,49 @@
 </template>
 
 <script>
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 
 export default {
   setup() {
+    const defaultListName = 'My Shopping List';
+    const listNames = ref(JSON.parse(localStorage.getItem('listNames') || '[]'));
+    const selectedList = ref(listNames.value[0] || '');
     const newTodo = ref('');
     const todos = ref(JSON.parse(localStorage.getItem('todos') || '[]'));
+    if (!listNames.value.includes(defaultListName)) {
+      // Create a new list and add it to listNames
+      const defaultList = [
+        { title: 'Get Butter', completed: false },
+        { title: 'Get Milk', completed: false },
+        { title: 'Get Eggs', completed: false }
+      ];
+      localStorage.setItem(defaultListName, JSON.stringify(defaultList));
+      listNames.value.push(defaultListName);
+      localStorage.setItem('listNames', JSON.stringify(listNames.value));
+    }
 
-    watch(todos, (newValue) => {
-      localStorage.setItem('todos', JSON.stringify(newValue));
-    }, { deep: true });
-    const incompleteTodos = computed(() => {
+    onMounted(() => {
+      if (selectedList.value) {
+        loadList();
+      }
+    });
+    const loadList = () => {
+      todos.value = JSON.parse(localStorage.getItem(selectedList.value) || '[]');
+    };
+    const createNewList = () => {
+      const newListName = prompt('Enter the name of the new list:');
+      if (newListName && !listNames.value.includes(newListName)) {
+        listNames.value.push(newListName);
+        localStorage.setItem('listNames', JSON.stringify(listNames.value));
+        selectedList.value = newListName;
+        todos.value = [];
+      }
+    }; 
+    watch([todos, selectedList], ([newTodos, newList]) => {
+      if (newList) {
+        localStorage.setItem(newList, JSON.stringify(newTodos));
+      }
+    }, { deep: true }); const incompleteTodos = computed(() => {
       return todos.value.filter(todo => !todo.completed);
     });
     const completedTodos = computed(() => {
@@ -108,7 +148,7 @@ export default {
       todos.value.splice(newIndex, 0, tempTodo);
     };
 
-    return { newTodo, todos, addTodo, removeTodo, moveTodo, incompleteTodos, completedTodos };
+    return { newTodo, todos, addTodo, removeTodo, moveTodo, incompleteTodos, completedTodos, listNames, selectedList, loadList, createNewList };
   },
 };
 </script>
@@ -120,4 +160,5 @@ li.list-group-item {
 
 .completed {
   background-color: #e6e6e6 !important;
-}</style>
+}
+</style>
